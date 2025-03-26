@@ -99,8 +99,7 @@ function addProject(projectData) {
       name: projectData.name,
       description: projectData.description,
       sector_id: projectData.sector_id,
-      contact_email: projectData.contact_email,
-      contact_phone: projectData.contact_phone,
+      intro_short: projectData.intro_short,
     })
       .then(() => {
         resolve();
