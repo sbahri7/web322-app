@@ -151,4 +151,5 @@ projectData.initialize().then(() => {
   app.listen(HTTP_PORT, () => { console.log(`server listening on: ${HTTP_PORT}`) });
 });
 
-module.exports = { sequelize, Sector, Project };
+module.exports = app;
+
