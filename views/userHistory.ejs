@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Climate Solutions</title>
+  <link rel="stylesheet" href="/css/main.css" />
+</head>
+
+<body tabindex="-1">
+
+  <%- include('partials/navbar', {page: '/solutions/userHistory' }) %>
+
+        <li>
+          <details>
+            <summary>Account: <%= session.user.userName %></summary>
+            <ul class="p-2 right-0">
+              <li><a href="/solutions/addProject">Add Project</a></li>
+              <li><a class="active" href="/userHistory">User History</a></li>
+              <li><a href="/logout">Log Out</a></li>
+            </ul>
+          </details>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="container mx-auto p-4">
+    <!-- Hero Section -->
+    <div class="hero bg-base-200 rounded-lg p-6">
+      <div class="hero-content text-center">
+        <div class="max-w-md">
+          <h1 class="text-5xl font-bold"><%= session.user.userName %></h1>
+          <p class="py-6">User History: <%= session.user.email %></p>
+        </div>
+      </div>
+    </div>
+
+    <br>
+
+    <!-- User Login History Table -->
+    <table class="table table-zebra">
+      <thead>
+        <tr>
+          <th>Login Date/Time</th>
+          <th>Client Information</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Loop through loginHistory and display each entry -->
+        <% session.user.loginHistory.forEach(function(login) { %>
+          <tr>
+            <td><%= new Date(login.date).toLocaleString() %></td>
+            <td><%= login.userAgent %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+</body>
+
+</html>

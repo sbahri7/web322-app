@@ -99,8 +99,7 @@ function addProject(projectData) {
       name: projectData.name,
       description: projectData.description,
       sector_id: projectData.sector_id,
-      contact_email: projectData.contact_email,
-      contact_phone: projectData.contact_phone,
+      intro_short: projectData.intro_short,
     })
       .then(() => {
         resolve();
@@ -129,8 +128,7 @@ function editProject(id, projectData) {
       name: projectData.name,
       description: projectData.description,
       sector_id: projectData.sector_id,
-      contact_email: projectData.contact_email,
-      contact_phone: projectData.contact_phone,
+      intro_short: projectData.intro_short,
     }, {
       where: { id: id }
     })
@@ -147,5 +145,24 @@ function editProject(id, projectData) {
   });
 }
 
-module.exports = { initialize, getAllProjects, getProjectById, getProjectsBySector,  addProject, getAllSectors, editProject};
+function deleteProject(id) {
+  return new Promise((resolve, reject) => {
+    Project.destroy({
+      where: { id: id } 
+    })
+    .then((deletedRows) => {
+      if (deletedRows === 0) {
+        reject("No project found with the specified id.");
+      } else {
+        resolve();  
+      }
+    })
+    .catch((err) => {
+      reject(err.errors ? err.errors[0].message : "An error occurred while deleting the project.");
+    });
+  });
+}
+
+
+module.exports = { initialize, getAllProjects, getProjectById, getProjectsBySector,  addProject, getAllSectors, editProject, deleteProject};
 

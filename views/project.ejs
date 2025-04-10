@@ -7,20 +7,18 @@
   <title>Climate Solutions</title>
   <link rel="stylesheet" href="/css/main.css" />
   <script>
-    document.addEventListener("DOMContentLoaded", async ()=>{
+    document.addEventListener("DOMContentLoaded", async () => {
+      let res = await fetch("https://dummyjson.com/quotes/random");
+      let data = await res.json();
 
-        let res = await fetch("https://dummyjson.com/quotes/random");
-        let data = await res.json();
-
-        document.getElementById("quote").innerHTML = `"${data.quote}"<br />- <em>${data.author}</em>`;
+      document.getElementById("quote").innerHTML = `"${data.quote}"<br />- <em>${data.author}</em>`;
     });
   </script>
-
 </head>
 
 <body tabindex="-1">
 
-  <%- include('partials/navbar', {page: ''}) %>
+  <%- include('partials/navbar', { page: '' }) %>
 
   <div class="container mx-auto p-4">
 
@@ -39,28 +37,28 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div>
-          <img class="w-full rounded-lg"
-            src="<%= project.feature_img_url %>"
-            alt=" Set Image" />
+        <img class="w-full rounded-lg"
+          src="<%= project.feature_img_url %>"
+          alt="Set Image" />
       </div>
       <div class="prose">
+        <p>
+          <%= project.intro_short %> <br /><br />
+          <span class="font-bold">Impact: </span><br /><br /> <%= project.impact %> <br /><br />
 
-       <p>
-        <%= project.intro_short %> <br /><br />
-        <span class="font-bold">Impact: </span><br /><br /> <%= project.impact %> <br /><br />
+          <span class="font-bold">More Information: </span> <a href="<%= project.original_source_url %>" target="_blank"><%= project.original_source_url %></a><br /><br />
 
-        <span class="font-bold">More Information: </span> <a href="<%= project.original_source_url %>" target="_blank"><%= project.original_source_url %></a><br /><br />
+          <span id="quote"></span>
+          <br /><br />
 
-        <span id="quote"></span>
-        <br /><br />
+          <!-- Conditionally show the Edit Project button if the user is logged in -->
+          <% if(session.user) { %>
+            <a href="/solutions/editProject/<%= project.id %>" class="btn btn-primary btn-sm"> Edit Project: <%= project.title %> </a>
+          <% } %>
 
-        <a href="/solutions/editProject/<%= project.id %>" class="btn btn-primary btn-sm"> Edit Project: <%= project.title %> </a>
-        
-        <a class="btn btn-primary btn-sm" href="#" onclick="history.back(); return false;">RETURN</a><br /><br />
-       </p>
-
+          <a class="btn btn-primary btn-sm" href="#" onclick="history.back(); return false;">RETURN</a><br /><br />
+        </p>
       </div>
-
     </div>
 
   </div>
