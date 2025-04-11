@@ -13,7 +13,7 @@ const authData = require("./modules/auth-service");
 require('dotenv').config();
 const projectData = require("./modules/projects");
 const clientSessions = require("client-sessions");
-const { sequelize, Sector, Project } = require('./models'); 
+const { sequelize, Sector, Project } = require('./models');
 const express = require('express');
 const router = express.Router();
 const app = express();
@@ -24,99 +24,94 @@ app.use(express.static(__dirname + '/public'));
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 
-app.use(router);  
-app.use(express.urlencoded({ extended: true })); 
+app.use(router);
+app.use(express.urlencoded({ extended: true }));
 
 app.use(clientSessions({
-  cookieName: 'session', 
-  secret: 'your-secret-key-here', 
-  duration: 30 * 60 * 1000, 
-  activeDuration: 5 * 60 * 1000, 
-  httpOnly: true, 
-  secure: process.env.NODE_ENV === 'production', 
+  cookieName: 'session',
+  secret: 'your-secret-key-here',
+  duration: 30 * 60 * 1000,
+  activeDuration: 5 * 60 * 1000,
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
 }));
 
 app.use((req, res, next) => {
-  res.locals.session = req.session; 
+  res.locals.session = req.session;
   next();
 });
 
-// Custom middleware to check if a user is logged in
 function ensureLogin(req, res, next) {
-  if (!req.session.userName) { // Check if userName is not in session (i.e., user is not logged in)
-    return res.redirect('/login');  // Redirect to login page if not logged in
+  if (!req.session.userName) {
+    return res.redirect('/login');
   }
-  next();  // Proceed to the next middleware or route handler if logged in
+  next();
 }
 
 app.get('/', (req, res) => {
   res.render("home", { page: '/' });
 });
 
-// New Route: Login
 app.get('/login', (req, res) => {
   res.render('login', { errorMessage: '', userName: '', page: '/login' });
 });
 
-// New Route: Register
 app.get('/register', (req, res) => {
   res.render('register', { errorMessage: '', successMessage: '', userName: '', page: '/register' });
 });
 
-// New Route: Register (POST)
-app.post('/register', (req, res) => {
+app.post('/register', async (req, res) => {
   const userData = {
     userName: req.body.userName,
     email: req.body.email,
     password: req.body.password,
   };
-  
-  authData.registerUser(userData)
-    .then(() => {
-      res.render('register', {
-        errorMessage: '',
-        successMessage: 'User created',
-        userName: '',
-        page: '/register'
-      });
-    })
-    .catch((err) => {
-      res.render('register', {
-        errorMessage: err,
-        successMessage: '',
-        userName: req.body.userName,
-        page: '/register'
-      });
+
+  try {
+    await authData.initialize();
+    await authData.registerUser(userData);
+
+    res.render('register', {
+      errorMessage: '',
+      successMessage: 'User created',
+      userName: '',
+      page: '/register'
     });
+  } catch (err) {
+    res.render('register', {
+      errorMessage: err,
+      successMessage: '',
+      userName: req.body.userName,
+      page: '/register'
+    });
+  }
 });
 
+app.post('/login', async (req, res) => {
+  req.body.userAgent = req.get('User-Agent');
 
-app.post('/login', (req, res) => {
-  req.body.userAgent = req.get('User-Agent'); 
-  
-  authData.checkUser(req.body)
-    .then((user) => {
-      req.session.user = {
-        userName: user.userName,
-        email: user.email,
-        loginHistory: user.loginHistory,
-      };
-      res.redirect('/solutions/projects');
-    })
-    .catch((err) => {
-      res.render('login', { errorMessage: err, userName: req.body.userName, page: '/login' });
-    });
+  try {
+    await authData.initialize();
+    const user = await authData.checkUser(req.body);
+
+    req.session.user = {
+      userName: user.userName,
+      email: user.email,
+      loginHistory: user.loginHistory,
+    };
+    res.redirect('/solutions/projects');
+  } catch (err) {
+    res.render('login', { errorMessage: err, userName: req.body.userName, page: '/login' });
+  }
 });
 
-// New Route: Logout
 app.get('/logout', (req, res) => {
-  req.session.reset();  // Reset the session
-  res.redirect('/');  // Redirect to home page after logout
+  req.session.reset();
+  res.redirect('/');
 });
 
-// New Route: User History (protected by ensureLogin)
 app.get('/userHistory', ensureLogin, (req, res) => {
-  res.render('userHistory', { page: '/userHistory' });  // Render userHistory view
+  res.render('userHistory', { page: '/userHistory' });
 });
 
 app.get("/solutions/projects", async (req, res) => {
@@ -142,7 +137,6 @@ app.get("/solutions/projects/:id", async (req, res) => {
   }
 });
 
-//GET addProject
 app.get('/solutions/addProject', async (req, res) => {
   try {
     const sectorData = await projectData.getAllSectors();
@@ -152,10 +146,8 @@ app.get('/solutions/addProject', async (req, res) => {
   }
 });
 
-//POST addProject
 app.post('/solutions/addProject', async (req, res) => {
   try {
-    // Extract project data from the form submission
     const projectData = {
       title: req.body.title,
       feature_img_url: req.body.feature_img_url,
@@ -173,12 +165,11 @@ app.post('/solutions/addProject', async (req, res) => {
   }
 });
 
-// Existing Routes for editing and deleting projects...
 app.get('/solutions/editProject/:id', async (req, res) => {
   try {
     const projectId = req.params.id;
 
-    const [projectData, sectorData] = await Promise.all([ 
+    const [projectData, sectorData] = await Promise.all([
       Project.findByPk(projectId, { include: [{ model: Sector, attributes: ['sector_name'] }] }),
       Sector.findAll()
     ]);
@@ -223,23 +214,19 @@ app.post('/solutions/editProject', async (req, res) => {
 router.get('/solutions/deleteProject/:id', async (req, res) => {
   try {
     const projectId = req.params.id;
-
     await projectData.deleteProject(projectId);
-
     res.redirect('/solutions/projects');
   } catch (err) {
     res.render('500', { message: `I'm sorry, but we have encountered the following error: ${err}`, page: '/solutions/projects' });
   }
 });
 
-// 404 middleware for handling missing routes
 app.use((req, res, next) => {
   res.status(404).render("404", { message: "I'm sorry, we're unable to find what you're looking for", page: '' });
 });
 
-// Initialize project and authentication data
+// Only initialize SQL project data here (not Mongo)
 projectData.initialize()
-  .then(authData.initialize) 
   .then(() => {
     app.listen(HTTP_PORT, () => {
       console.log(`server listening on: ${HTTP_PORT}`);
@@ -250,4 +237,3 @@ projectData.initialize()
   });
 
 module.exports = app;
-
