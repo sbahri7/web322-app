@@ -90,11 +90,11 @@ app.post('/register', (req, res) => {
     });
 });
 
-// New Route: Login (POST)
+
 app.post('/login', (req, res) => {
-  req.body.userAgent = req.get('User-Agent'); // Set User-Agent
+  req.body.userAgent = req.get('User-Agent'); 
   
-  authData.CheckUser(req.body)
+  authData.checkUser(req.body)
     .then((user) => {
       req.session.user = {
         userName: user.userName,

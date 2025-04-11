@@ -34,6 +34,12 @@ function initialize()
   });
 }
 
+const saveUserToDb = (userData) => 
+{
+  return User.create(userData);
+};
+
+
 const registerUser = (userData) => {
   return new Promise((resolve, reject) => {
     bcrypt.hash(userData.password, 10)
@@ -52,6 +58,11 @@ const registerUser = (userData) => {
         reject('There was an error encrypting the password: ' + err);
       });
   });
+};
+
+const getUserFromDb = async (userName) =>
+{
+  return await User.findOne({ userName: userName });
 };
 
 
