@@ -26,6 +26,7 @@ app.set('view engine', 'ejs');
 
 app.use(router);
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 app.use(clientSessions({
   cookieName: 'session',
@@ -65,6 +66,7 @@ app.post('/register', async (req, res) => {
     userName: req.body.userName,
     email: req.body.email,
     password: req.body.password,
+    password2: req.body.password2,
   };
 
   try {

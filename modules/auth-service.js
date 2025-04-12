@@ -25,7 +25,7 @@ module.exports.initialize = function () {
       User = mongoose.model("users", userSchema);
       resolve();
     } else {
-      mongoose.connect(process.env.MONGO_CONN_STRING, { useNewUrlParser: true, useUnifiedTopology: true })
+      mongoose.connect(process.env.MONGODB_CONN_STRING, { useNewUrlParser: true, useUnifiedTopology: true })
         .then(() => {
           User = mongoose.model("users", userSchema);
           resolve();
@@ -39,6 +39,7 @@ module.exports.initialize = function () {
 
 module.exports.registerUser = function (userData) {
   return new Promise(async (resolve, reject) => {
+    console.log(userData)
     if (userData.password !== userData.password2) {
       reject("Passwords do not match");
       return;
